@@ -7,7 +7,7 @@ import { solidity, MockProvider, createFixtureLoader } from 'ethereum-waffle'
 import { getCreate2Address } from './shared/utilities'
 import { factoryFixture } from './shared/fixtures'
 
-import UniswapV2Pair from '../build/waffle/UniswapV2Pair.json'
+import TofuswapV2Pair from '../build/waffle/TofuswapV2Pair.json'
 
 chai.use(solidity)
 
@@ -16,7 +16,7 @@ const TEST_ADDRESSES: [string, string] = [
   '0x2000000000000000000000000000000000000000'
 ]
 
-describe('UniswapV2Factory', () => {
+describe('TofuswapV2Factory', () => {
   const provider = new MockProvider({
     hardfork: 'istanbul',
     mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
@@ -38,7 +38,7 @@ describe('UniswapV2Factory', () => {
   })
 
   async function createPair(tokens: [string, string]) {
-    const bytecode = `0x${UniswapV2Pair.evm.bytecode.object}`
+    const bytecode = `0x${TofuswapV2Pair.evm.bytecode.object}`
     // @TRONMOD
     // const create2Address = getCreate2Address(factory.address, tokens, bytecode)
     const create2Address = '0x70658f7d03ACf4CfA5113B564f2282C70662d6d5'
@@ -53,7 +53,7 @@ describe('UniswapV2Factory', () => {
     expect(await factory.allPairs(0)).to.eq(create2Address)
     expect(await factory.allPairsLength()).to.eq(1)
 
-    const pair = new Contract(create2Address, JSON.stringify(UniswapV2Pair.abi), provider)
+    const pair = new Contract(create2Address, JSON.stringify(TofuswapV2Pair.abi), provider)
     expect(await pair.factory()).to.eq(factory.address)
     expect(await pair.token0()).to.eq(TEST_ADDRESSES[0])
     expect(await pair.token1()).to.eq(TEST_ADDRESSES[1])

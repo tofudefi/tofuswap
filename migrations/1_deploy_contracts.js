@@ -1,6 +1,6 @@
-const UniswapV2Factory = artifacts.require('UniswapV2Factory')
-// const UniswapV2ERC20 = artifacts.require('UniswapV2ERC20')
-// const UniswapV2Pair = artifacts.require('UniswapV2Pair')
+const TofuswapV2Factory = artifacts.require('TofuswapV2Factory')
+// const TofuswapV2ERC20 = artifacts.require('TofuswapV2ERC20')
+// const TofuswapV2Pair = artifacts.require('TofuswapV2Pair')
 
 module.exports = async function(deployer) {
   const accounts = await web3.eth.getAccounts()
@@ -8,5 +8,5 @@ module.exports = async function(deployer) {
   // enabled
   const feeToSetter = accounts[0]
   console.log(`feeToSetter = ${feeToSetter}`)
-  await deployer.deploy(UniswapV2Factory, ...[feeToSetter])
+  await deployer.deploy(TofuswapV2Factory, ...[feeToSetter])
 }
