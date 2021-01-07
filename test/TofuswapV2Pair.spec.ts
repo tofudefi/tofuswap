@@ -84,7 +84,7 @@ describe('TofuswapV2Pair', () => {
       await addLiquidity(token0Amount, token1Amount)
       await token0.transfer(pair.address, swapAmount)
       await expect(pair.swap(0, expectedOutputAmount.add(1), wallet.address, '0x', overrides)).to.be.revertedWith(
-        'UniswapV2: K'
+        'TofuswapV2: K'
       )
       await pair.swap(0, expectedOutputAmount, wallet.address, '0x', overrides)
     })
@@ -102,7 +102,7 @@ describe('TofuswapV2Pair', () => {
       await addLiquidity(token0Amount, token1Amount)
       await token0.transfer(pair.address, inputAmount)
       await expect(pair.swap(outputAmount.add(1), 0, wallet.address, '0x', overrides)).to.be.revertedWith(
-        'UniswapV2: K'
+        'TofuswapV2: K'
       )
       await pair.swap(outputAmount, 0, wallet.address, '0x', overrides)
     })
@@ -177,7 +177,9 @@ describe('TofuswapV2Pair', () => {
     await mineBlock(provider, (await provider.getBlock('latest')).timestamp + 1)
     const tx = await pair.swap(expectedOutputAmount, 0, wallet.address, '0x', overrides)
     const receipt = await tx.wait()
-    expect(receipt.gasUsed).to.eq(73462)
+    //TRON
+    expect(receipt.gasUsed).to.eq(73529)
+    //expect(receipt.gasUsed).to.eq(73462)
   })
 
   it('burn', async () => {

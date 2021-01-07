@@ -21,10 +21,10 @@ contract TofuswapV2Factory is ITofuswapV2Factory {
     }
 
     function createPair(address tokenA, address tokenB) external returns (address pair) {
-        require(tokenA != tokenB, 'UniswapV2: IDENTICAL_ADDRESSES');
+        require(tokenA != tokenB, 'TofuswapV2: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'UniswapV2: ZERO_ADDRESS');
-        require(getPair[token0][token1] == address(0), 'UniswapV2: PAIR_EXISTS'); // single check is sufficient
+        require(token0 != address(0), 'TofuswapV2: ZERO_ADDRESS');
+        require(getPair[token0][token1] == address(0), 'TofuswapV2: PAIR_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(TofuswapV2Pair).creationCode;
         // @TRONMOD
         // salt not needed for create operation
@@ -43,12 +43,12 @@ contract TofuswapV2Factory is ITofuswapV2Factory {
     }
 
     function setFeeTo(address _feeTo) external {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'TofuswapV2: FORBIDDEN');
         feeTo = _feeTo;
     }
 
     function setFeeToSetter(address _feeToSetter) external {
-        require(msg.sender == feeToSetter, 'UniswapV2: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'TofuswapV2: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
 }
