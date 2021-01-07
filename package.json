@@ -1,5 +1,5 @@
 {
-  "name": "@tofudefi/swap-v2-core",
+  "name": "@tofudefi/tofuswap-v2-core",
   "description": "🎛 Core contrats for the TofuSwapV2 protocol",
   "version": "1.0.0",
   "homepage": "https://tofuswap.org",
