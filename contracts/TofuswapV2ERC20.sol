@@ -1,4 +1,4 @@
-pragma solidity =0.5.16;
+pragma solidity =0.5.14;
 
 import './interfaces/ITofuswapV2ERC20.sol';
 import './libraries/SafeMath.sol';
@@ -21,24 +21,9 @@ contract TofuswapV2ERC20 is ITofuswapV2ERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor() public {
-        // TODO: find out if hardcoding this value might cause issues...
-        uint chainId = 11111;
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
-                keccak256(bytes(name)),
-                keccak256(bytes('1')),
-                chainId,
-                address(this)
-            )
-        );
-    }
-    // Original Ethereum code:
-    /*
+
     constructor() public {
         uint chainId;
-        // TODO(tron): chainid is invalid opcode
         assembly {
             chainId := chainid
         }
@@ -52,7 +37,7 @@ contract TofuswapV2ERC20 is ITofuswapV2ERC20 {
             )
         );
     }
-    */
+    
 
     function _mint(address to, uint value) internal {
         totalSupply = totalSupply.add(value);
