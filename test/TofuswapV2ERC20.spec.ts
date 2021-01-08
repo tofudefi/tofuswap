@@ -44,7 +44,7 @@ describe('TofuswapV2ERC20', () => {
             ),
             keccak256(toUtf8Bytes(name)),
             keccak256(toUtf8Bytes('1')),
-            11111,
+            1,
             token.address
           ]
         )
