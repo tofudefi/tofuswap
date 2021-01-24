@@ -39,9 +39,7 @@ describe('TofuswapV2Factory', () => {
 
   async function createPair(tokens: [string, string]) {
     const bytecode = `0x${TofuswapV2Pair.evm.bytecode.object}`
-    // @TRONMOD
-    // const create2Address = getCreate2Address(factory.address, tokens, bytecode)
-    const create2Address = '0x70658f7d03ACf4CfA5113B564f2282C70662d6d5'
+    const create2Address = getCreate2Address(factory.address, tokens, bytecode)
     await expect(factory.createPair(...tokens))
       .to.emit(factory, 'PairCreated')
       .withArgs(TEST_ADDRESSES[0], TEST_ADDRESSES[1], create2Address, bigNumberify(1))
@@ -71,7 +69,7 @@ describe('TofuswapV2Factory', () => {
     const tx = await factory.createPair(...TEST_ADDRESSES)
     const receipt = await tx.wait()
     // @TRONMOD
-    expect(receipt.gasUsed).to.eq(2554629)
+    expect(receipt.gasUsed).to.eq(2557066)
     // Eth
     //expect(receipt.gasUsed).to.eq(2510525)
   })

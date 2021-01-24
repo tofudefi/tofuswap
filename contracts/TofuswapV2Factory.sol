@@ -26,14 +26,9 @@ contract TofuswapV2Factory is ITofuswapV2Factory {
         require(token0 != address(0), 'TofuswapV2: ZERO_ADDRESS');
         require(getPair[token0][token1] == address(0), 'TofuswapV2: PAIR_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(TofuswapV2Pair).creationCode;
-        // @TRONMOD
-        // salt not needed for create operation
-        // bytes32 salt = keccak256(abi.encodePacked(token0, token1));
+        bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
-            // @TRONMOD
-            // pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
-            // @TODO: ensure changing create2 to create doesn't alter logic
-            pair := create(0, add(bytecode, 32), mload(bytecode))
+            pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         ITofuswapV2Pair(pair).initialize(token0, token1);
         getPair[token0][token1] = pair;
