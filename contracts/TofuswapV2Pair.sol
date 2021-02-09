@@ -7,6 +7,7 @@ import './libraries/UQ112x112.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/ITofuswapV2Factory.sol';
 import './interfaces/ITofuswapV2Callee.sol';
+import './interfaces/ITofuFreeze.sol';
 
 contract TofuswapV2Pair is ITofuswapV2Pair, TofuswapV2ERC20 {
     using SafeMath  for uint;
@@ -18,6 +19,8 @@ contract TofuswapV2Pair is ITofuswapV2Pair, TofuswapV2ERC20 {
     address public factory;
     address public token0;
     address public token1;
+    // TOFU
+    address public tofuFreeze;
     // TRON
     address private constant USDT_TOKEN_ADDRESS = 0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C;
 
@@ -76,10 +79,11 @@ contract TofuswapV2Pair is ITofuswapV2Pair, TofuswapV2ERC20 {
     }
 
     // called once by the factory at time of deployment
-    function initialize(address _token0, address _token1) external {
+    function initialize(address _token0, address _token1, address _tofuFreeze) external {
         require(msg.sender == factory, 'TofuswapV2: FORBIDDEN'); // sufficient check
         token0 = _token0;
         token1 = _token1;
+        tofuFreeze = _tofuFreeze;
     }
 
     // update reserves and, on the first call per block, price accumulators
@@ -167,6 +171,55 @@ contract TofuswapV2Pair is ITofuswapV2Pair, TofuswapV2ERC20 {
         if (feeOn) kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
         emit Burn(msg.sender, amount0, amount1, to);
     }
+
+    // this low-level function should be called from a contract which performs important safety checks
+    function swapWithTofu(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
+        require(amount0Out > 0 || amount1Out > 0, 'TofuswapV2: INSUFFICIENT_OUTPUT_AMOUNT');
+        (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
+        require(amount0Out < _reserve0 && amount1Out < _reserve1, 'TofuswapV2: INSUFFICIENT_LIQUIDITY');
+
+        uint balance0;
+        uint balance1;
+        { // scope for _token{0,1}, avoids stack too deep errors
+        address _token0 = token0;
+        address _token1 = token1;
+        require(to != _token0 && to != _token1, 'TofuswapV2: INVALID_TO');
+        if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
+        if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
+        if (data.length > 0) ITofuswapV2Callee(to).tofuswapV2Call(msg.sender, amount0Out, amount1Out, data);
+        balance0 = IERC20(_token0).balanceOf(address(this));
+        balance1 = IERC20(_token1).balanceOf(address(this));
+        }
+        uint amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;
+        uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
+
+        require(amount0In > 0 || amount1In > 0, 'TofuswapV2: INSUFFICIENT_INPUT_AMOUNT');
+        { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
+        uint basisPoints = 30;
+        uint originTofuBalance = ITofuFreeze(tofuFreeze).balanceOf(tx.origin);
+
+	// balance > 10000 TOFU tokens
+	if (originTofuBalance >= 10000000000) {
+	    basisPoints = 20;
+	} else if (originTofuBalance >= 5000000000) {
+	    basisPoints = 22;
+	} else if (originTofuBalance >= 2000000000) {
+	    basisPoints = 24;
+	} else if (originTofuBalance >= 500000000) {
+	    basisPoints = 26;
+	} else if (originTofuBalance >= 100000000) {
+	    basisPoints = 28;
+	}
+
+        uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(basisPoints));
+        uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(basisPoints));
+        require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10000**2), 'TofuswapV2: K');
+        }
+
+        _update(balance0, balance1, _reserve0, _reserve1);
+        emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
+    }
+
 
     // this low-level function should be called from a contract which performs important safety checks
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {

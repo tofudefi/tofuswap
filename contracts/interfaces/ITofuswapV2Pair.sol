@@ -45,8 +45,9 @@ interface ITofuswapV2Pair {
     function mint(address to) external returns (uint liquidity);
     function burn(address to) external returns (uint amount0, uint amount1);
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
+    function swapWithTofu(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
     function skim(address to) external;
     function sync() external;
 
-    function initialize(address, address) external;
+    function initialize(address, address, address) external;
 }

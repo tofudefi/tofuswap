@@ -1,6 +1,7 @@
 pragma solidity =0.5.14;
 
 import './interfaces/ITofuswapV2Factory.sol';
+import './interfaces/ITofuFreeze.sol';
 import './TofuswapV2Pair.sol';
 
 contract TofuswapV2Factory is ITofuswapV2Factory {
@@ -9,11 +10,14 @@ contract TofuswapV2Factory is ITofuswapV2Factory {
 
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
+    
+    address public tofuFreeze;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter) public {
+    constructor(address _feeToSetter, address _tofuFreeze) public {
         feeToSetter = _feeToSetter;
+        tofuFreeze = _tofuFreeze;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -25,12 +29,16 @@ contract TofuswapV2Factory is ITofuswapV2Factory {
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), 'TofuswapV2: ZERO_ADDRESS');
         require(getPair[token0][token1] == address(0), 'TofuswapV2: PAIR_EXISTS'); // single check is sufficient
+        
+        uint originTofuBalance = ITofuFreeze(tofuFreeze).balanceOf(tx.origin);
+        require(originTofuBalance >= 100000000000, 'TofuswapV2: NOT_GOVERNOR');        
+        
         bytes memory bytecode = type(TofuswapV2Pair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        ITofuswapV2Pair(pair).initialize(token0, token1);
+        ITofuswapV2Pair(pair).initialize(token0, token1, tofuFreeze);
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
