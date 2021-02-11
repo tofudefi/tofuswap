@@ -89,6 +89,30 @@ describe('TofuswapV2Pair', () => {
       await pair.swap(0, expectedOutputAmount, wallet.address, '0x', overrides)
     })
   })
+  
+  const swapTestCasesWithTofu: BigNumber[][] = [
+    [1, 5, 10, '1663887962654218072'],
+    [1, 10, 5, '453718857974177123'],
+
+    [2, 5, 10, '2853058890794739851'],
+    [2, 10, 5, '831943981327109036'],
+
+    [1, 10, 10, '907437715948354246'],
+    [1, 100, 100, '988138378977801540'],
+    [1, 1000, 1000, '997004989020957084']
+  ].map(a => a.map(n => (typeof n === 'string' ? bigNumberify(n) : expandTo18Decimals(n))))
+  swapTestCasesWithTofu.forEach((swapTestCase, i) => {
+    it(`getInputPriceWithTofu:${i}`, async () => {
+      const [swapAmount, token0Amount, token1Amount, expectedOutputAmount] = swapTestCase
+      await addLiquidity(token0Amount, token1Amount)
+      await token0.transfer(pair.address, swapAmount)
+      await expect(pair.swapWithTofu(0, expectedOutputAmount.add(1), wallet.address, '0x', overrides)).to.be.revertedWith(
+        'TofuswapV2: K'
+      )
+      await pair.swapWithTofu(0, expectedOutputAmount, wallet.address, '0x', overrides)
+    })
+  })  
+  
 
   const optimisticTestCases: BigNumber[][] = [
     ['997000000000000000', 5, 10, 1], // given amountIn, amountOut = floor(amountIn * .997)
@@ -107,6 +131,26 @@ describe('TofuswapV2Pair', () => {
       await pair.swap(outputAmount, 0, wallet.address, '0x', overrides)
     })
   })
+  
+  
+  const optimisticTestCasesWithTofu: BigNumber[][] = [
+    ['998000000000000000', 5, 10, 1], // given amountIn, amountOut = floor(amountIn * .998)
+    ['998000000000000000', 10, 5, 1],
+    ['998000000000000000', 5, 5, 1],
+    [1, 5, 5, '1002004008016032065'] // given amountOut, amountIn = ceiling(amountOut / .998)
+  ].map(a => a.map(n => (typeof n === 'string' ? bigNumberify(n) : expandTo18Decimals(n))))
+  optimisticTestCasesWithTofu.forEach((optimisticTestCase, i) => {
+    it(`optimisticWithTofu:${i}`, async () => {
+      const [outputAmount, token0Amount, token1Amount, inputAmount] = optimisticTestCase
+      await addLiquidity(token0Amount, token1Amount)
+      await token0.transfer(pair.address, inputAmount)
+      await expect(pair.swapWithTofu(outputAmount.add(1), 0, wallet.address, '0x', overrides)).to.be.revertedWith(
+        'TofuswapV2: K'
+      )
+      await pair.swapWithTofu(outputAmount, 0, wallet.address, '0x', overrides)
+    })
+  })  
+  
 
   it('swap:token0', async () => {
     const token0Amount = expandTo18Decimals(5)
@@ -181,6 +225,26 @@ describe('TofuswapV2Pair', () => {
     expect(receipt.gasUsed).to.eq(73529)
     //expect(receipt.gasUsed).to.eq(73462)
   })
+  
+  it('swapWithTofu100:gas', async () => {
+    const token0Amount = expandTo18Decimals(5)
+    const token1Amount = expandTo18Decimals(10)
+    await addLiquidity(token0Amount, token1Amount)
+
+    // ensure that setting price{0,1}CumulativeLast for the first time doesn't affect our gas math
+    await mineBlock(provider, (await provider.getBlock('latest')).timestamp + 1)
+    await pair.sync(overrides)
+
+    const swapAmount = expandTo18Decimals(1)
+    const expectedOutputAmount = bigNumberify('453388135161677517')
+    await token1.transfer(pair.address, swapAmount)
+    await mineBlock(provider, (await provider.getBlock('latest')).timestamp + 1)
+    const tx = await pair.swapWithTofu(expectedOutputAmount, 0, wallet.address, '0x', overrides)
+    const receipt = await tx.wait()
+    //TRON
+    expect(receipt.gasUsed).to.eq(77201)
+    //expect(receipt.gasUsed).to.eq(73462)
+  })  
 
   it('burn', async () => {
     const token0Amount = expandTo18Decimals(3)
