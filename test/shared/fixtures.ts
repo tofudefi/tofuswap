@@ -17,7 +17,8 @@ const overrides = {
 }
 
 export async function factoryFixture(_: Web3Provider, [wallet]: Wallet[]): Promise<FactoryFixture> {
-  const factory = await deployContract(wallet, TofuswapV2Factory, [wallet.address], overrides)
+  const tofuFreeze = await deployContract(wallet, ERC20, [100000000000], overrides) //expandTo18Decimals(1)
+  const factory = await deployContract(wallet, TofuswapV2Factory, [wallet.address, tofuFreeze.address], overrides)
   return { factory }
 }
 
@@ -28,6 +29,7 @@ interface PairFixture extends FactoryFixture {
 }
 
 export async function pairFixture(provider: Web3Provider, [wallet]: Wallet[]): Promise<PairFixture> {
+
   const { factory } = await factoryFixture(provider, [wallet])
 
   const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)], overrides)
