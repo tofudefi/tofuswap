@@ -91,15 +91,15 @@ describe('TofuswapV2Pair', () => {
   })
   
   const swapTestCasesWithTofu: BigNumber[][] = [
-    [1, 5, 10, '1663887962654218072'],
-    [1, 10, 5, '453718857974177123'],
+    [1, 5, 10, '1665277546257709618'],
+    [1, 10, 5, '454132193835803254'],
 
-    [2, 5, 10, '2853058890794739851'],
-    [2, 10, 5, '831943981327109036'],
+    [2, 5, 10, '2855101457559302657'],
+    [2, 10, 5, '832638773128854809'],
 
-    [1, 10, 10, '907437715948354246'],
-    [1, 100, 100, '988138378977801540'],
-    [1, 1000, 1000, '997004989020957084']
+    [1, 10, 10, '908264387671606509'],
+    [1, 100, 100, '989118704145585599'],
+    [1, 1000, 1000, '998002995007987020']
   ].map(a => a.map(n => (typeof n === 'string' ? bigNumberify(n) : expandTo18Decimals(n))))
   swapTestCasesWithTofu.forEach((swapTestCase, i) => {
     it(`getInputPriceWithTofu:${i}`, async () => {
@@ -134,10 +134,10 @@ describe('TofuswapV2Pair', () => {
   
   
   const optimisticTestCasesWithTofu: BigNumber[][] = [
-    ['998000000000000000', 5, 10, 1], // given amountIn, amountOut = floor(amountIn * .998)
-    ['998000000000000000', 10, 5, 1],
-    ['998000000000000000', 5, 5, 1],
-    [1, 5, 5, '1002004008016032065'] // given amountOut, amountIn = ceiling(amountOut / .998)
+    ['999000000000000000', 5, 10, 1], // given amountIn, amountOut = floor(amountIn * .999)
+    ['999000000000000000', 10, 5, 1],
+    ['999000000000000000', 5, 5, 1],
+    [1, 5, 5, '1001001001001001002'] // given amountOut, amountIn = ceiling(amountOut / .999)
   ].map(a => a.map(n => (typeof n === 'string' ? bigNumberify(n) : expandTo18Decimals(n))))
   optimisticTestCasesWithTofu.forEach((optimisticTestCase, i) => {
     it(`optimisticWithTofu:${i}`, async () => {

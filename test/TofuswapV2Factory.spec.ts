@@ -69,7 +69,7 @@ describe('TofuswapV2Factory', () => {
     const tx = await factory.createPair(...TEST_ADDRESSES)
     const receipt = await tx.wait()
     // @TRONMOD
-    expect(receipt.gasUsed).to.eq(3005981)
+    expect(receipt.gasUsed).to.eq(3001967)
     // Eth
     //expect(receipt.gasUsed).to.eq(2510525)
   })

@@ -198,18 +198,16 @@ contract TofuswapV2Pair is ITofuswapV2Pair, TofuswapV2ERC20 {
         uint basisPoints = 30;
         uint originTofuBalance = ITofuFreeze(tofuFreeze).balanceOf(tx.origin);
 
-	// balance > 10000 TOFU tokens
-	if (originTofuBalance >= 10000000000) {
+	// balance > 100000 TOFU tokens
+	if (originTofuBalance >= 100000000000) {
+	    basisPoints = 10;
+	} else if (originTofuBalance >= 10000000000) {
+	    basisPoints = 15;
+	} else if (originTofuBalance >= 1000000000) {
 	    basisPoints = 20;
-	} else if (originTofuBalance >= 5000000000) {
-	    basisPoints = 22;
-	} else if (originTofuBalance >= 2000000000) {
-	    basisPoints = 24;
-	} else if (originTofuBalance >= 500000000) {
-	    basisPoints = 26;
 	} else if (originTofuBalance >= 100000000) {
-	    basisPoints = 28;
-	}
+	    basisPoints = 25;
+	} 
 
         uint balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(basisPoints));
         uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(basisPoints));
