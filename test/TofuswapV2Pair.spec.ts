@@ -222,7 +222,7 @@ describe('TofuswapV2Pair', () => {
     const tx = await pair.swap(expectedOutputAmount, 0, wallet.address, '0x', overrides)
     const receipt = await tx.wait()
     //TRON
-    expect(receipt.gasUsed).to.eq(73529)
+    expect(receipt.gasUsed).to.eq(73530)
     //expect(receipt.gasUsed).to.eq(73462)
   })
   
@@ -242,7 +242,7 @@ describe('TofuswapV2Pair', () => {
     const tx = await pair.swapWithTofu(expectedOutputAmount, 0, wallet.address, '0x', overrides)
     const receipt = await tx.wait()
     //TRON
-    expect(receipt.gasUsed).to.eq(77201)
+    expect(receipt.gasUsed).to.eq(77136)
     //expect(receipt.gasUsed).to.eq(73462)
   })  
 
